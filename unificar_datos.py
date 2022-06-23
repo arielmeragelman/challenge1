@@ -1,5 +1,10 @@
 from typing import MutableSequence
 import pandas as pd
+from registros import registrar
+
+registrar()
+
+
 
 def abrir_csv(categoria,anio,mes,dia):
 # Funcion lectura de archivos csv (fuente de datos) -
@@ -43,9 +48,16 @@ def generar_tablas(parametros):
 # La funcion recorre una lista de categorias para una fecha determinada y arma una lista con los objetos resultantes  
 # Version: 1.0 - Sebastian Meragelman
 
+    if not (parametros[0][0] and parametros[1][0] and parametros[1][1] and parametros[1][2] ):
+        logging.error("No estan definidos todos los parametros necesarios")
+    logging.info("parametros: "+str(parametros))
+
     tablas=[]
     for cat in parametros[0]:
-        tablas.append(abrir_csv(cat,parametros[1][0],parametros[1][1],parametros[1][2]))        
+        try:
+            tablas.append(abrir_csv(cat,parametros[1][0],parametros[1][1],parametros[1][2]))        
+        except:
+                logging.error("No se pudo abrir el archivo csv")
     return tablas
 
 def agregar_timestamp(tabla):
@@ -58,7 +70,10 @@ def agregar_timestamp(tabla):
     from datetime import datetime
     dt=datetime.now()
     ts=datetime.timestamp(dt)
-    tabla['modifica'] =  ts
+    try:
+        tabla['modifica'] =  ts
+    except:
+        logging.error("El objeto tabla no es un dataframe")
     return tabla['modifica']
     
 
@@ -73,6 +88,8 @@ def depurar_tablas(tabla,columnas):
 # La funcion filtra el dataframe y devuelve un nuevo objeto con las columnas seleccionadas  
 # Version: 1.0 - Sebastian Meragelman
 
+    if type(columnas) != list:  
+        logging.error("El objeto columnas no es una lista con las columnas")
 
     #Se utiliza un diccionario para corresponder cada identificador de columna con una ubicación de columna para cada tabla
     museos_dic = dict()
@@ -84,36 +101,38 @@ def depurar_tablas(tabla,columnas):
     biblioteca_ix= []
     cines_ix= []
     
-    #Defino los diccionarios
-    museos_dic = {'Cod_Loc' : 0,'IdProvincia' : 1,'IdDepartamento' : 2,'Observaciones' : 3,'categoria' : 4,'subcategoria' : 5,'provincia' : 6,'localidad' : 7,'nombre' : 8,'direccion' : 9,'piso' : 10,'CP' : 11,'cod_area' : 12,'telefono' : 13,'mail' : 14,'web' : 15,'Latitud' : 16,'Longitud' : 17,'TipoLatitudLongitud' : 18,'Info_adicional' : 19,'fuente' : 20,'jurisdiccion' : 21,'a_inauguracion' : 22,'actualizacion' : 23
-    }
-    #Cargo los indices usando el diccionario
-    for i in columnas:
-        try:
+    try:
+        #Defino los diccionarios
+        museos_dic = {'Cod_Loc' : 0,'IdProvincia' : 1,'IdDepartamento' : 2,'Observaciones' : 3,'categoria' : 4,'subcategoria' : 5,'provincia' : 6,'localidad' : 7,'nombre' : 8,'direccion' : 9,'piso' : 10,'CP' : 11,'cod_area' : 12,'telefono' : 13,'mail' : 14,'web' : 15,'Latitud' : 16,'Longitud' : 17,'TipoLatitudLongitud' : 18,'Info_adicional' : 19,'fuente' : 20,'jurisdiccion' : 21,'a_inauguracion' : 22,'actualizacion' : 23
+        }
+        #Cargo los indices usando el diccionario
+        for i in columnas:
+            try:
             
-            museos_ix.append(museos_dic[i])
-        except:
-            pass
+                museos_ix.append(museos_dic[i])
+            except:
+                pass
 
     
 
         
         
-    biblioteca_dic = {'Cod_Loc' : 0,'IdProvincia' : 1,'IdDepartamento' : 2,'Observaciones' : 3,'categoria' : 4,'subcategoria':5,'provincia' : 6,'Departamento' : 7,'localidad' : 8,'nombre' : 9,'direccion' : 10,'piso' : 11,'CP' : 12,'cod_area' : 13,'telefono' : 14,'mail' : 15,'web' : 16,'Info_adicional' : 17,'Latitud' : 18,'Longitud' : 19,'TipoLatitudLongitud' : 20,'fuente' : 21,'Tipo_gestion' : 22,'a_inauguracion' : 23,'actualizacion' : 24
-    }
+        biblioteca_dic = {'Cod_Loc' : 0,'IdProvincia' : 1,'IdDepartamento' : 2,'Observaciones' : 3,'categoria' : 4,'subcategoria':5,'provincia' : 6,'Departamento' : 7,'localidad' : 8,'nombre' : 9,'direccion' : 10,'piso' : 11,'CP' : 12,'cod_area' : 13,'telefono' : 14,'mail' : 15,'web' : 16,'Info_adicional' : 17,'Latitud' : 18,'Longitud' : 19,'TipoLatitudLongitud' : 20,'fuente' : 21,'Tipo_gestion' : 22,'a_inauguracion' : 23,'actualizacion' : 24
+        }
 
-    for i in columnas:
-        try:
-            biblioteca_ix.append(biblioteca_dic[i])
-        except:
-            pass
+        for i in columnas:
+            try:
+                biblioteca_ix.append(biblioteca_dic[i])
+            except:
+                pass
 
-        cines_dic = {'Cod_Loc':0, 'IdProvincia':1, 'IdDepartamento':2, 'Observaciones':3,'categoria':4, 'provincia':5, 'Departamento':6, 'localidad':7, 'nombre':8,'direccion':9, 'piso':10, 'CP':11, 'cod_area':12, 'telefono':13, 'mail':14, 'web':15,'Info_adicional':16, 'Latitud':17, 'Longitud':18, 'TipoLatitudLongitud':19,'fuente':20, 'tipo_gestion':21, 'Pantallas':22, 'Butacas':23, 'espacio_INCAA':24,'actualizacion':25}
+            cines_dic = {'Cod_Loc':0, 'IdProvincia':1, 'IdDepartamento':2, 'Observaciones':3,'categoria':4, 'provincia':5, 'Departamento':6, 'localidad':7, 'nombre':8,'direccion':9, 'piso':10, 'CP':11, 'cod_area':12, 'telefono':13, 'mail':14, 'web':15,'Info_adicional':16, 'Latitud':17, 'Longitud':18, 'TipoLatitudLongitud':19,'fuente':20, 'tipo_gestion':21, 'Pantallas':22, 'Butacas':23, 'espacio_INCAA':24,'actualizacion':25}
 
-    for i in columnas:
-        cines_ix.append(cines_dic[i])
+        for i in columnas:
+            cines_ix.append(cines_dic[i])
         
-    
+    except:
+        logging.error("Hay columnas que no figuran en la definicion del diccionario")
 
         
     #Realizo el filtrado de columnas y la conversión de registros vacios por "NULL"

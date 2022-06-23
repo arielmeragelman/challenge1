@@ -41,8 +41,10 @@ def insertar(engine,n_tabla,tabla):
 #  Output: N/a 
 # Funcion inserta en la bbdd el objeto dataframe creando una tabla de no existir o agregando nuevos registros si los existieran  
 # Version: 1.0 - Sebastian Meragelman
-
-    tabla.to_sql(n_tabla, engine, if_exists='append' ,schema='public')
+    try:
+        tabla.to_sql(n_tabla, engine, if_exists='append' ,schema='public')
+    except:
+        logging.error("No se inserto correctamente la tabla: "+str(n_tabla.columns))
 
     
 
@@ -54,8 +56,7 @@ def limpiar_tabla(engine,t_bbdd):
 # Version: 0.1 - Sin probar - Sebastian Meragelman
 
     consulta="select limpiar_tabla(\'public.\""+t_bbdd+ "\"\');"
-    print(consulta)
-    print(ejecutar(engine,consulta))
+    ejecutar(engine,consulta)
 
 
 def carga_cines(conexion):
@@ -91,7 +92,10 @@ def calculo_total(conexion):
     t1,t2,t3=depurar_tablas(tabla1,columnas)
     
     #Unimos las 3 fuentes en un mismo dataframe
-    t= pd.concat([t1,t2,t3])
+    try:
+        t= pd.concat([t1,t2,t3])
+    except:
+        logging.error("No se pudieron unir las tablas t1 t2 t3 - controlar dimenciones")
 
     #Obtenemos 3 dataframes a partir de la agrupacion y conteo de registros
     ta=t.groupby(['categoria'])['categoria'].count()
@@ -104,7 +108,11 @@ def calculo_total(conexion):
     #A partir de esta nueva clase genero un recuento
     td=td.groupby(['concat'])['concat'].count()
     #Defino un nuevo dataframe de dimenciones 2xN donde N es la cantidad de registros total entre todos los dataframe concatenados
-    t= pd.concat([ta,tb,tc,td])
+    try:
+        t= pd.concat([ta,tb,tc,td])
+    except:
+        logging.error("No se pudieron unir las tablas ta tb tc td - controlar dimenciones")
+
 
 
     insertar(conexion,"T_Total",t)
