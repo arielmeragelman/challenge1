@@ -4,7 +4,7 @@ import pandas as pd
 from unificar_datos import obtener_parametros, generar_tablas, depurar_tablas
 from interfaz_bbdd import conexion_bbdd,ejecutar,insertar,carga_cines,calculo_total
 from registros import registrar
-
+from decouple import config
 
 if __name__ == "__main__":
 
@@ -16,10 +16,17 @@ if __name__ == "__main__":
 # challenge1: nombre de la bbdd
 
 #Inicializo el motor de logging
-    registrar()
+    logging=registrar()
+
+# Importo la informacion de la configuracion desde settings.ini
+    user=config('USR', default=False, cast=str)
+    passwd=config('PASS', default=False, cast=str)
+    host=config('HOST_', default=False, cast=str)
+    port=config('PUERTO', default=False, cast=str)
+    db=config('BBDD', default=False, cast=str)
 
 
-    conexion=conexion_bbdd("u_challenge1", "password_challenge1", "localhost", 5432, "challenge1")
+    conexion=conexion_bbdd(user, passwd, host, port, db)
     logging.info("Conexion con la bbdd correcta ")
 # Se declara una lista de parametros para el analisis de los archivos
     parametros=obtener_parametros()
@@ -37,16 +44,17 @@ if __name__ == "__main__":
 
 # Se eliminan los registros de las tablas antes de guardar registros nuevos
     try:
-     ejecutar(conexion,"delete from public.\"T_Agrupados\"")
-     print("Registros de Agrupados eliminados correctamente")
-     ejecutar(conexion,"delete from public.\"T_Cines\"")
-     print("Registros de Cines eliminados correctamente")
-     ejecutar(conexion,"delete from public.\"T_Total\"")
-     print("Registros de Totales eliminados correctamente")
+        ejecutar(conexion,"delete from public.\"T_Agrupados\"")
+        print("Registros de Agrupados eliminados correctamente")
+        ejecutar(conexion,"delete from public.\"T_Cines\"")
+        print("Registros de Cines eliminados correctamente")
+        ejecutar(conexion,"delete from public.\"T_Total\"")
+        print("Registros de Totales eliminados correctamente")
     except:
-    logging.warning("Los registros de las tablas no pudieron ser eliminados ")
+        logging.warning("Los registros de las tablas no pudieron ser eliminados ")
     
     finally:
+    
     
     # Inserto los registros de la tabla unificada generada en la base de dato
      insertar(conexion,"T_Agrupados",agrupados)
@@ -57,7 +65,3 @@ if __name__ == "__main__":
     # Calculo e inserto los registros propios de calculo total
      calculo_total(conexion)
      logging.info("Se cargo correctamente T_Totales ")
-
-
-
-

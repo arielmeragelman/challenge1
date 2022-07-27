@@ -1,9 +1,9 @@
 import pandas as pd
-from unificar_datos import generar_tablas
-from unificar_datos import obtener_parametros,depurar_tablas
 from registros import registrar
+from unificar_datos import obtener_parametros,generar_tablas,depurar_tablas
 
-registrar()
+logging=registrar()
+
 
 
 def conexion_bbdd(user, passwd, host, port, db):
@@ -19,11 +19,12 @@ def conexion_bbdd(user, passwd, host, port, db):
     url = f"postgresql://{user}:{passwd}@{host}:{port}/{db}"
     try:
         engine = create_engine(url, pool_size=50, echo=False)
+        return engine
+
     except:
         logging.error("No se establecio la conexion con la bbdd url: "+url)
-    
-    return engine
-
+        print("ERROR CRITICO NO SE PUDO ESTABLECER CONEXION CON LA BASE DE DATOS")    
+        exit()
 
 
 def ejecutar(engine,consulta):
@@ -44,6 +45,7 @@ def insertar(engine,n_tabla,tabla):
     try:
         tabla.to_sql(n_tabla, engine, if_exists='append' ,schema='public')
     except:
+        
         logging.error("No se inserto correctamente la tabla: "+str(n_tabla.columns))
 
     
@@ -70,10 +72,17 @@ def carga_cines(conexion):
     columnas= ['provincia','Pantallas','Butacas','espacio_INCAA']
     parametros=obtener_parametros()
     tabla1=generar_tablas(parametros)
-
+    
+    
+    
+    
+    
+    
     t1,t2,t3=depurar_tablas(tabla1,columnas)
+    
+    
     t2['espacio_INCAA']=t2['espacio_INCAA'].replace({'NULL':0,'0':0,'si':1,'SI':1})
-    t2=t2.groupby("provincia").agg({columnas[1]:['sum'],columnas[2]:['sum'],columnas[3]:['sum']}).reset_index(level=0)
+    t2=t2.groupby("Provincia").agg({columnas[1]:['sum'],columnas[2]:['sum'],columnas[3]:['sum']}).reset_index(level=0)
     insertar(conexion,"T_Cines",t2)
     
 

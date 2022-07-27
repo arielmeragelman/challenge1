@@ -1,4 +1,5 @@
 def registrar():
+    global logging
     import logging
     LOG_FILE= "loggs_info.log"
     logging.basicConfig(
@@ -6,3 +7,6 @@ def registrar():
     format = "%(asctime)s [%(levelname)s] %(message)s",
     datefmt='%m/%d/%Y %I:%M:%S',
     handlers=[logging.FileHandler(LOG_FILE)])
+    return logging
+
+

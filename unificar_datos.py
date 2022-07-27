@@ -1,8 +1,7 @@
 from typing import MutableSequence
 import pandas as pd
 from registros import registrar
-
-registrar()
+logging=registrar()
 
 
 
@@ -75,7 +74,27 @@ def agregar_timestamp(tabla):
     except:
         logging.error("El objeto tabla no es un dataframe")
     return tabla['modifica']
-    
+
+
+def timestamp(tabla):
+# Funcion crea una columna a partir del objeto pandas con el timestamp de cuando se ejecuta la consulta 
+#  Input> tabla: objeto pandas para trabajar 
+#  Output: objeto pandas de tamaño 1xN  donde N sera la cantidad de registros del objeto pandas 
+# La funcion obtiene el timestamp del momento de ejecucion y lo asigna a un objeto pandas con la forma 1xN  
+# Version: 1.0 - Sebastian Meragelman
+   
+    from datetime import datetime
+    dt=datetime.now()
+    ts=datetime.timestamp(dt)
+    try:
+        tabla = tabla.assign(Timestamp=ts)
+        return tabla
+    except:
+        logging.error("El objeto tabla no es un dataframe")
+        exit()
+
+
+
 
 
     
@@ -90,6 +109,7 @@ def depurar_tablas(tabla,columnas):
 
     if type(columnas) != list:  
         logging.error("El objeto columnas no es una lista con las columnas")
+        exit()
 
     #Se utiliza un diccionario para corresponder cada identificador de columna con una ubicación de columna para cada tabla
     museos_dic = dict()
@@ -149,14 +169,20 @@ def depurar_tablas(tabla,columnas):
     #Se aplica una clausula try para poder reusar el codigo en una sola de las tablas o en todas
     try:
         tabla[0].columns = columnas
+        tabla[1].columns = columnas
         tabla[2].columns = columnas
+        
+        
     except:
         pass
-    tabla[1].columns = columnas
+    
+    
+    
     
     #Agrego una columna con el tiempo de modificacion
     for i,v in enumerate(tabla):
-        #tabla[i]['Modifica'] = agregar_timestamp(v)
-        tabla[i] = agregar_timestamp(v)        
-    
+        
+        #tabla[i] = agregar_timestamp(v)        
+        tabla[i] = timestamp(tabla[i])
+        
     return tabla
